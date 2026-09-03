@@ -1,0 +1,8 @@
+categories:
+  NEW_ENQUIRY:
+    keywords: [quote, estimate, pricing, cost]
+  PAYMENT:
+    keywords: [invoice, payment, overdue, receipt]
+followup:
+  NEW_ENQUIRY_HOURS: 24
+  QUOTE_SENT_DAYS: 3

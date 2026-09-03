@@ -1,0 +1,12 @@
+categories:
+  BUYER:
+    keywords: [buyer, inspection, viewing]
+  OFFER:
+    keywords: [offer, purchase price]
+  CONTRACT:
+    keywords: [contract, settlement, exchange]
+  APPRAISAL:
+    keywords: [appraisal, valuation]
+followup:
+  BUYER_ENQUIRY_HOURS: 12
+  APPRAISAL_DAYS: 2

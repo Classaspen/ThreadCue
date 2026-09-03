@@ -1,0 +1,1 @@
+"""Attention Inbox application package."""
