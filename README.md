@@ -65,6 +65,7 @@ python -m pytest -q
 - 报价请求识别
 - `WAITING_ON_USER` / `WAITING_ON_CUSTOMER` 状态判断
 - 明确日期截止时间识别
+- Gmail 分页读取、发件方向识别和 HTML 邮件正文解析
 
 如果系统中没有 `pytest` 命令，使用 `python -m pytest -q`，这样可以确保测试使用当前 Python 环境。
 
@@ -111,6 +112,17 @@ analyses = AnalysisService().analyze(messages)
 ```
 
 当前 `app.main` 默认打开空 Dashboard；`--demo` 用于展示 UI 和分析效果。真实模式下可以直接点击顶部的 **Connect Gmail**，选择 OAuth client JSON 完成授权，再点击 **Sync now** 拉取邮件并刷新 Dashboard。
+
+### 界面使用流程
+
+1. 启动 `python -m app.main`。
+2. 点击顶部 **Connect Gmail**，在文件选择器中选择 Google OAuth client JSON。
+3. 在浏览器中完成 Google 授权。应用只申请 Gmail 只读权限。
+4. 点击 **Settings**，选择行业和同步时间范围，然后点击 **Save**。
+5. 点击 **Sync now**，等待邮件读取和规则分析完成。
+6. 在左侧按优先级筛选 thread，点击邮件后在右侧查看状态、分数和具体原因。
+
+应用使用 Gmail 官方 API 的 `users.messages.list`、`users.messages.get` 和 `users.getProfile` 接口。读取结果支持多页，不会因为 Gmail 返回下一页 token 而漏掉邮件；发件方向通过 Gmail 的 `SENT` 标签和已授权账号地址判断。
 
 ## 6. 行业 Profile
 
@@ -188,7 +200,7 @@ from app.db.database import create_database
 engine = create_database("local-test.db")
 ```
 
-真实邮箱数据属于敏感信息。不要把数据库文件、OAuth 文件或 token 提交到代码仓库。
+真实邮箱数据属于敏感信息。不要把数据库文件、OAuth 文件或 token 提交到代码仓库。应用不会把邮件正文写入日志。
 
 ## 9. 打包 Windows EXE
 
@@ -220,5 +232,8 @@ tests/              pytest 测试
 - 默认只读 Gmail，不自动发信。
 - 不会自动删除或修改邮件。
 - OAuth token 保存在系统 keyring。
+- OAuth client JSON 由用户通过系统文件选择器提供，应用不会复制或上传它。
+- Gmail API 使用只读 scope，不申请发送、删除或修改邮件的权限。
+- 同步请求使用官方 Google API client，不自行实现 OAuth 或 Gmail 协议。
 - 分析结果保存在本地 SQLite。
 - OAuth client JSON 不会被应用复制到项目目录；虚拟环境、缓存和 smoke test 数据已加入 `.gitignore`。
