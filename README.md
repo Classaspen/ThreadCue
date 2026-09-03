@@ -77,9 +77,9 @@ python -m pytest -q
 3. 配置 OAuth consent screen。
 4. 创建 OAuth Client ID，应用类型选择 **Desktop app**。
 5. 下载客户端 JSON 文件。
-6. 将文件重命名为 `credentials.json`，放在项目根目录。
+6. 将文件保存到安全位置。点击应用中的 **Connect Gmail** 时，通过系统文件选择器选择它，不需要复制到项目目录。
 
-`credentials.json` 已被 `.gitignore` 忽略，不应提交到 Git。第一次授权时 Google 会打开浏览器，授权范围是 Gmail 只读：
+OAuth client JSON 包含敏感配置，不应提交到 Git 或发送给他人。第一次授权时 Google 会打开浏览器，授权范围是 Gmail 只读：
 
 ```text
 https://www.googleapis.com/auth/gmail.readonly
@@ -110,7 +110,7 @@ from app.services.analysis_service import AnalysisService
 analyses = AnalysisService().analyze(messages)
 ```
 
-当前 `app.main` 默认打开空 Dashboard；`--demo` 用于展示 UI 和分析效果。Gmail OAuth、数据库和同步 service 已提供基础模块，但“启动应用后自动授权、同步并刷新 Dashboard”的完整编排仍是下一步开发内容。
+当前 `app.main` 默认打开空 Dashboard；`--demo` 用于展示 UI 和分析效果。真实模式下可以直接点击顶部的 **Connect Gmail**，选择 OAuth client JSON 完成授权，再点击 **Sync now** 拉取邮件并刷新 Dashboard。
 
 ## 6. 行业 Profile
 
@@ -150,25 +150,25 @@ analyses = AnalysisService(rules=rules).analyze(messages)
 
 当前评分会根据这些条件累加：
 
-| 条件 | 分数 |
-| --- | ---: |
-| 新 lead | +30 |
-| 等待你回复 | +25 |
-| 检测到报价请求 | +25 |
-| 报价后跟进到期 | +20 |
-| 检测到截止日期 | +15 |
-| 截止日期已过 | +30 |
-| 已有客户 | +15 |
-| 检测到行动短语 | +15 |
+| 条件           | 分数 |
+| -------------- | ---: |
+| 新 lead        |  +30 |
+| 等待你回复     |  +25 |
+| 检测到报价请求 |  +25 |
+| 报价后跟进到期 |  +20 |
+| 检测到截止日期 |  +15 |
+| 截止日期已过   |  +30 |
+| 已有客户       |  +15 |
+| 检测到行动短语 |  +15 |
 
 优先级区间：
 
-| 分数 | 优先级 |
-| ---: | --- |
+|      分数 | 优先级       |
+| --------: | ------------ |
 | 80 及以上 | `CRITICAL` |
-| 60-79 | `HIGH` |
-| 30-59 | `MEDIUM` |
-| 低于 30 | `LOW` |
+|     60-79 | `HIGH`     |
+|     30-59 | `MEDIUM`   |
+|   低于 30 | `LOW`      |
 
 每个分析结果都包含 `reasons`，例如 `+25 Quote request detected`，方便在 UI 中解释为什么一封邮件被提升优先级。
 
@@ -198,7 +198,7 @@ engine = create_database("local-test.db")
 pyinstaller --name attention-inbox --windowed app/main.py
 ```
 
-生成的文件通常位于 `dist\attention-inbox\`。首次使用 Gmail 时，仍需要把 `credentials.json` 放到程序预期的位置，并完成浏览器授权。
+生成的文件通常位于 `dist\attention-inbox\`。首次使用 Gmail 时，在应用中选择 OAuth client JSON 并完成浏览器授权。
 
 ## 10. 目录说明
 
@@ -221,4 +221,4 @@ tests/              pytest 测试
 - 不会自动删除或修改邮件。
 - OAuth token 保存在系统 keyring。
 - 分析结果保存在本地 SQLite。
-- `credentials.json`、虚拟环境、缓存和 smoke test 数据已加入 `.gitignore`。
+- OAuth client JSON 不会被应用复制到项目目录；虚拟环境、缓存和 smoke test 数据已加入 `.gitignore`。
